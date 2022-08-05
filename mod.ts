@@ -1,6 +1,4 @@
-import { serve, Handler } from "https://deno.land/std@0.145.0/http/server.ts";
-
-// import "https://deno.land/std@0.151.0/dotenv/load.ts";
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 
 const TOKEN = Deno.env.get("DISCORD_TOKEN");
 
@@ -16,30 +14,17 @@ async function getUser(id: string | number) {
   return data;
 }
 
-const server: Handler = async (request) => {
-  if (request.method !== "POST") {
-    return new Response(undefined, { status: 405 });
-  }
+const router = new Router();
 
-  const { pathname } = new URL(request.url);
+router.get("/:id", async (context) => {
+  const id = context.params.id;
 
-  if (pathname !== "/") {
-    return new Response(undefined, { status: 404 });
-  }
+  context.response.body = await getUser(id);
+});
 
-  if (!request.body) {
-    return new Response(undefined, { status: 422 });
-  }
+const app = new Application();
 
-  const body = await request.json();
+app.use(router.routes());
+app.use(router.allowedMethods());
 
-  if (!body.id) {
-    return new Response(undefined, { status: 422 });
-  }
-
-  const data = await getUser(body.id);
-
-  return new Response(JSON.stringify(data));
-};
-
-serve(server);
+app.listen({ port: 8000 });
