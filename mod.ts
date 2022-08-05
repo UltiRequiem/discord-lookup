@@ -1,25 +1,10 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-
-const TOKEN = Deno.env.get("DISCORD_TOKEN");
-
-async function getUser(id: string | number) {
-  const response = await fetch(`https://discord.com/api/v9/users/${id}`, {
-    headers: {
-      Authorization: `Bot ${TOKEN}`,
-    },
-  });
-
-  const data = response.json();
-
-  return data;
-}
+import { Application, Router } from "https://deno.land/x/oak@v10.6.0/mod.ts";
+import { getUser } from "./discord-user.ts";
 
 const router = new Router();
 
 router.get("/:id", async (context) => {
-  const id = context.params.id;
-
-  context.response.body = await getUser(id);
+  context.response.body = await getUser(context.params.id);
 });
 
 const app = new Application();
